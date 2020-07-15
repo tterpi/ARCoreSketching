@@ -114,6 +114,12 @@ namespace Meshing {
         /// <returns></returns>
         public Mesh replacePoints(List<Vector3> points, int index, int addCount, int removeCount) {
 
+            if(addCount == 0 && removeCount == 0)
+            {
+                Debug.LogWarning("Nothing was added or removed.");
+                return null;
+            }
+
             int pointIndex = 0;
             int verticesIndex = 0;
             int pointAddCount = 0;

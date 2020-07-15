@@ -31,7 +31,10 @@ public class SplineMesh
 
     private void updateMesh(SplineModificationInfo info) {
         //Debug.Log(info);
-        meshFilter.mesh = lineExtruder.replacePoints(interpolatedPoints, info.Index, info.AddCount, info.RemoveCount);
+        Mesh newMesh = lineExtruder.replacePoints(interpolatedPoints, info.Index, info.AddCount, info.RemoveCount);
+        if (newMesh != null) {
+            meshFilter.mesh = newMesh;
+        }
     }
 
     public void addControlPoint(Vector3 controlPoint) {

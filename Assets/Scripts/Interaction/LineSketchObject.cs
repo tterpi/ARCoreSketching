@@ -21,8 +21,15 @@ public class LineSketchObject : MonoBehaviour
         meshCollider = GetComponent<MeshCollider>();
 
         SplineMesh = new SplineMesh(new KochanekBartelsSpline(), meshFilter);
-        Vector3[] controlPoints = { new Vector3(0, 0, 0), new Vector3(.2f, .2f, 0), new Vector3(.4f, 0, 0) };
-        SplineMesh.setControlPoints(controlPoints);
+        //Vector3[] controlPoints = { new Vector3(0, 0, 0), new Vector3(.2f, .2f, 0), new Vector3(.4f, 0, 0) };
+        ////SplineMesh.setControlPoints(controlPoints);
+
+        //foreach(Vector3 point in controlPoints)
+        //{
+        //    SplineMesh.addControlPoint(point);
+        //}
+
+        //SplineMesh.deleteControlPoint(SplineMesh.getNumberOfControlPoints() - 1);
 
         meshCollider.sharedMesh = meshFilter.sharedMesh;
     }

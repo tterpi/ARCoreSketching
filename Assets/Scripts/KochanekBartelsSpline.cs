@@ -75,7 +75,18 @@ namespace Splines
         /// <param name="index"></param>
         /// <param name="controlPoint"></param>
         public SplineModificationInfo insertControlPoint(int index, KochanekBartelsControlPoint controlPoint) {
+
             ControlPoints.Insert(index, controlPoint);
+
+            if (ControlPoints.Count < 3 && InterpolatedPoints.Count < 2 * Steps)
+            {
+                Debug.LogWarning("Control point was added but the line can only be interpolated when there are at least 3 control points.");
+                return new SplineModificationInfo(0, 0, 0);
+            }
+            else if (ControlPoints.Count == 3) {
+                this.setControlPoints(ControlPoints.ToArray());
+                return new SplineModificationInfo(0, 0, 2 * Steps);
+            }
 
             //determine which segments have to be reinterpolated
             int start = (index - 2) >= 0 ? (index - 2) : 0;
@@ -121,10 +132,10 @@ namespace Splines
         /// <param name="index"></param>
         public override SplineModificationInfo deleteControlPoint(int index) {
 
-            if ((ControlPoints.Count - 1) < 3) {
-                Debug.LogError("Cannot remove more control points, minimum number is 3.");
-                return new SplineModificationInfo(0,0,0);
-            }
+            //if ((ControlPoints.Count - 1) < 3) {
+            //    Debug.LogError("Cannot remove more control points, minimum number is 3.");
+            //    return new SplineModificationInfo(0,0,0);
+            //}
 
             if (index == (ControlPoints.Count - 1))
             {
@@ -135,6 +146,11 @@ namespace Splines
             }
 
             ControlPoints.RemoveAt(index);
+
+            if (ControlPoints.Count < 3) {
+                int startIndex = (index - 1) >= 0 ? (index - 1) : 0;
+                return new SplineModificationInfo(startIndex * Steps, Steps, 0);
+            }
 
             //determine which segments have to be reinterpolated
             int start = (index - 2) >= 0 ? (index - 2) : 0;
@@ -281,6 +297,10 @@ namespace Splines
 
             if (i< 0 || i >= ControlPoints.Count - 1) {
                 Debug.LogError("Index out of range! Last segment is at number of control points minus one.");
+                return null;
+            }else if(ControlPoints.Count < 3)
+            {
+                Debug.LogError("There have to be at least 3 control points.");
                 return null;
             }
 
