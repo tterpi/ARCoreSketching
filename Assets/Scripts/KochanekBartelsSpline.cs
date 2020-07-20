@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -137,7 +138,11 @@ namespace Splines
             //    return new SplineModificationInfo(0,0,0);
             //}
 
-            if (index == (ControlPoints.Count - 1))
+            //Check if there is only one point left
+            if (ControlPoints.Count == 1 && index == 0) {
+                //nothing left to remove
+            }
+            else if (index == (ControlPoints.Count - 1))
             {
                 InterpolatedPoints.RemoveRange((index -1) * Steps, Steps);
             }
@@ -147,9 +152,13 @@ namespace Splines
 
             ControlPoints.RemoveAt(index);
 
-            if (ControlPoints.Count < 3) {
+            if (ControlPoints.Count == 2)
+            {
                 int startIndex = (index - 1) >= 0 ? (index - 1) : 0;
                 return new SplineModificationInfo(startIndex * Steps, Steps, 0);
+            }
+            else if (ControlPoints.Count < 2) {
+                return new SplineModificationInfo(0, index * Steps, 0);
             }
 
             //determine which segments have to be reinterpolated
@@ -335,6 +344,11 @@ namespace Splines
 
         public override int getNumberOfControlPoints() {
             return ControlPoints.Count;
+        }
+
+        public override List<Vector3> getControlPoints() {
+            List<Vector3> vectorControlPoints = ControlPoints.Select(controlPoint => controlPoint.Position).ToList();
+            return vectorControlPoints;
         }
 
         //Adapters for the interface

@@ -65,4 +65,8 @@ public class SplineMesh
     public int getNumberOfControlPoints() {
         return Spline.getNumberOfControlPoints();
     }
+
+    public List<Vector3> getControlPoints() {
+        return Spline.getControlPoints();
+    }
 }

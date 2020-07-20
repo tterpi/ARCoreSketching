@@ -176,6 +176,11 @@ namespace Meshing {
             //update triangles
             triangles = generateTriangles(crossSectionShape.Count, (vertices.Count / crossSectionShape.Count) - 1);
 
+            //mesh is empty or there is just a single cross section left because second to last control point or last control point was removed
+            if (vertices.Count <= crossSectionShape.Count && normals.Count <= crossSectionShape.Count) {
+                return new Mesh();
+            }
+
             Mesh mesh;
 
             if (generateCaps)

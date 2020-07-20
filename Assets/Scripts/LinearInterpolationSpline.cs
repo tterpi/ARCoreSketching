@@ -41,6 +41,11 @@ namespace Splines {
         {
             return ControlPoints.Count;
         }
+
+        public override List<Vector3> getControlPoints()
+        {
+            return ControlPoints;
+        }
     }
 }
 
