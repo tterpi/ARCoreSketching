@@ -24,6 +24,7 @@ namespace Sketching
     using UnityEngine;
     using GoogleARCore.Examples.ObjectManipulation;
     using UnityEngine.EventSystems;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Controls the placement of objects via a tap gesture.
@@ -46,81 +47,84 @@ namespace Sketching
         /// </summary>
         public GameObject ManipulatorPrefab;
 
+        private Anchor worldAnchor;
+        private LineSketchObject currentLineSketchObject;
+        private bool addingControlPoints = false;
+        private Stack<LineSketchObject> LineSketchObjects = new Stack<LineSketchObject>();
+
+        protected override void Update()
+        {
+            base.Update();
+
+            if (addingControlPoints)
+            {
+                //Debug.Log("Continuing tap gesture");
+                if (currentLineSketchObject)
+                {
+                    //Debug.Log("Attempting to add control point.");
+                    currentLineSketchObject.addControlPointContinuous(FirstPersonCamera.transform.position + FirstPersonCamera.transform.forward * .3f);
+                }
+            }
+
+        }
+
         /// <summary>
         /// Returns true if the manipulation can be started for the given gesture.
         /// </summary>
         /// <param name="gesture">The current gesture.</param>
         /// <returns>True if the manipulation can be started.</returns>
-        protected override bool CanStartManipulationForGesture(TapGesture gesture)
+        protected override bool CanStartManipulationForGesture(DragGesture gesture)
         {
             // Should not handle input if the player is pointing on UI.
-            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+            if (Session.Status != SessionStatus.Tracking || EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
             {
+                Debug.Log("Not starting tap gesture");
                 return false;
             }
 
-            if (gesture.TargetObject == null)
-            {
-                return true;
-            }
+            return true;
+        }
 
-            return false;
+        protected override void OnStartManipulation(DragGesture gesture)
+        {
+            //base.OnStartManipulation(gesture);
+            //see if an anchor exists
+            if (!worldAnchor) {
+                Debug.Log("Create world anchor");
+                worldAnchor = Session.CreateAnchor(Frame.Pose);
+            }
+            Debug.Log("Creating sketch object");
+            // Instantiate game object at the hit pose.
+            var gameObject = Instantiate(SketchObjectPrefab, worldAnchor.gameObject.transform);
+            currentLineSketchObject = gameObject.GetComponent<LineSketchObject>();
+
+            addingControlPoints = true;
+
+            Select();
+            if (ManipulationSystem.Instance.SelectedObject != this.gameObject)
+            {
+                Debug.Log("Selecting manipulator failed. selected game object: " + ManipulationSystem.Instance.SelectedObject.name);
+            }
+            else {
+                Debug.Log("Sketch object manipulator selected.");
+            }
         }
 
         /// <summary>
         /// Function called when the manipulation is ended.
         /// </summary>
         /// <param name="gesture">The current gesture.</param>
-        protected override void OnEndManipulation(TapGesture gesture)
+        protected override void OnEndManipulation(DragGesture gesture)
         {
-            if (gesture.WasCancelled)
-            {
-                return;
+            addingControlPoints = false;
+            if (currentLineSketchObject) {
+                LineSketchObjects.Push(currentLineSketchObject);
             }
 
-            // If gesture is targeting an existing object we are done.
-            if (gesture.TargetObject != null)
-            {
-                return;
-            }
-
-            // Raycast against the location the player touched to search for planes.
-            TrackableHit hit;
-            TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon;
-
-            if (Frame.Raycast(
-                gesture.StartPosition.x, gesture.StartPosition.y, raycastFilter, out hit))
-            {
-                // Use hit pose and camera pose to check if hittest is from the
-                // back of the plane, if it is, no need to create the anchor.
-                if ((hit.Trackable is DetectedPlane) &&
-                    Vector3.Dot(FirstPersonCamera.transform.position - hit.Pose.position,
-                        hit.Pose.rotation * Vector3.up) < 0)
-                {
-                    Debug.Log("Hit at back of the current DetectedPlane");
-                }
-                else
-                {
-                    // Instantiate game object at the hit pose.
-                    var gameObject = Instantiate(SketchObjectPrefab, hit.Pose.position, hit.Pose.rotation);
-
-                    // Instantiate manipulator.
-                    var manipulator =
-                        Instantiate(ManipulatorPrefab, hit.Pose.position, hit.Pose.rotation);
-
-                    // Make game object a child of the manipulator.
-                    gameObject.transform.parent = manipulator.transform;
-
-                    // Create an anchor to allow ARCore to track the hitpoint as understanding of
-                    // the physical world evolves.
-                    var anchor = hit.Trackable.CreateAnchor(hit.Pose);
-
-                    // Make manipulator a child of the anchor.
-                    manipulator.transform.parent = anchor.transform;
-
-                    // Select the placed object.
-                    manipulator.GetComponent<Manipulator>().Select();
-                }
+        }
+        public void DeleteLastLineSketchObject() {
+            if (LineSketchObjects.Count != 0) {
+                Destroy(LineSketchObjects.Pop().gameObject);
             }
         }
     }

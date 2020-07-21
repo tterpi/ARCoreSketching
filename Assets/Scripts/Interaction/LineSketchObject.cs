@@ -47,6 +47,17 @@ public class LineSketchObject : MonoBehaviour
         
     }
 
+    public void addControlPointContinuous(Vector3 point) {
+        if (
+            SplineMesh.getNumberOfControlPoints() == 0 || 
+            (transform.InverseTransformPoint(point) - SplineMesh.getControlPoints()[SplineMesh.getNumberOfControlPoints() - 1]).magnitude > 1f
+           ) 
+        {
+            //Debug.Log("Add control point to line sketch object");
+            addControlPoint(point);
+        }
+    }
+
     public void deleteControlPoint() {
         SplineMesh.deleteControlPoint(SplineMesh.getNumberOfControlPoints() - 1);
         chooseDisplayMethod();
