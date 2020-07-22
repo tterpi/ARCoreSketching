@@ -30,6 +30,7 @@ namespace Sketching
         private bool canStartTouchManipulation = false;
 
         public GameObject pointMarker;
+        private bool touchBegan = false;
 
         public void Start()
         {
@@ -48,20 +49,35 @@ namespace Sketching
                 if (canStartTouchManipulation) {
                     if (currentTouch.phase == TouchPhase.Began)
                     {
-                       OnStartTouchManipulation();
+                        touchBegan = true;
                     }
-                    else if (currentTouch.phase == TouchPhase.Stationary || currentTouch.phase == TouchPhase.Moved)
+                    else if (currentTouch.phase == TouchPhase.Stationary)
                     {
 
-                        //Debug.Log("Continuing tap gesture");
-                        if (currentLineSketchObject)
+                        if (touchBegan) {
+                            OnStartTouchManipulation();
+                            touchBegan = false;
+                        }
+                        else if (currentLineSketchObject)
                         {
                             //Debug.Log("Attempting to add control point.");
                             currentLineSketchObject.addControlPointContinuous(FirstPersonCamera.transform.position + FirstPersonCamera.transform.forward * .3f);
                         }
                     }
                     else if (currentTouch.phase == TouchPhase.Ended) {
-                            OnEndTouchManipulation();
+                        //only delete if the current touch is not a hold touch
+                        //Debug.Log("swipe distance: " + (currentTouch.position.y - currentTouch.rawPosition.y)+ " screen width: " +  Screen.width);
+                        //Debug.Log("end fingerid: " + currentTouch.fingerId);
+                        //Debug.Log("Ending line creation");
+                        
+                        OnEndTouchManipulation();
+                        //if swipe left occured, delete the last sketch object
+                        if ((currentTouch.position.y - currentTouch.rawPosition.y) < 0 && Mathf.Abs(currentTouch.position.y - currentTouch.rawPosition.y) > Screen.width * 0.05)
+                        {
+                            //Debug.Log("Deleting last object");
+                            DeleteLastLineSketchObject();
+                        }
+
                         canStartTouchManipulation = false;
                     }
                 }
@@ -94,7 +110,7 @@ namespace Sketching
 
         private void OnEndTouchManipulation()
         {
-            if (currentLineSketchObject) {
+            if (currentLineSketchObject && !LineSketchObjects.Contains(currentLineSketchObject)) {
                 LineSketchObjects.Push(currentLineSketchObject);
             }
 
