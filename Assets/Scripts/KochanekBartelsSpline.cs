@@ -1,4 +1,10 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+//
+// Für das Forschungsprojekt/ICW im WiSe 19/20 erstellt. Kleinere Anpassungen für AR-Beleg.
+//
+//-----------------------------------------------------------------------
+
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;

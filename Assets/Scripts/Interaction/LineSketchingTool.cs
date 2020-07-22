@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿//-----------------------------------------------------------------------
+//
+// Für den AR-Beleg neu erstellt, wird nicht mehr verwendet.
+//
+//-----------------------------------------------------------------------
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GoogleARCore.Examples.ObjectManipulation;

@@ -1,35 +1,20 @@
 //-----------------------------------------------------------------------
-// <copyright file="PawnManipulator.cs" company="Google LLC">
 //
-// Copyright 2019 Google LLC. All Rights Reserved.
+// Für den AR-Beleg neu erstellt.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// </copyright>
 //-----------------------------------------------------------------------
 
 namespace Sketching
 {
     using GoogleARCore;
     using UnityEngine;
-    using GoogleARCore.Examples.ObjectManipulation;
     using UnityEngine.EventSystems;
     using System.Collections.Generic;
 
     /// <summary>
-    /// Controls the placement of objects via a tap gesture.
+    /// Controls the creation of line sketch objects via a tap gesture.
     /// </summary>
-    public class SketchObjectManipulator : Manipulator
+    public class SketchObjectManipulator : MonoBehaviour
     {
         /// <summary>
         /// The first-person camera being used to render the passthrough camera image (i.e. AR
@@ -37,43 +22,53 @@ namespace Sketching
         /// </summary>
         public Camera FirstPersonCamera;
 
-        /// <summary>
-        /// A prefab to place when a raycast from a user touch hits a plane.
-        /// </summary>
         public GameObject SketchObjectPrefab;
-
-        /// <summary>
-        /// Manipulator prefab to attach placed objects to.
-        /// </summary>
-        public GameObject ManipulatorPrefab;
 
         private Anchor worldAnchor;
         private LineSketchObject currentLineSketchObject;
-        private bool addingControlPoints = false;
         private Stack<LineSketchObject> LineSketchObjects = new Stack<LineSketchObject>();
+        private bool canStartTouchManipulation = false;
 
-        protected override void Update()
+        public GameObject pointMarker;
+
+        public void Start()
         {
-            base.Update();
-
-            if (addingControlPoints)
-            {
-                //Debug.Log("Continuing tap gesture");
-                if (currentLineSketchObject)
-                {
-                    //Debug.Log("Attempting to add control point.");
-                    currentLineSketchObject.addControlPointContinuous(FirstPersonCamera.transform.position + FirstPersonCamera.transform.forward * .3f);
-                }
-            }
-
+            pointMarker.transform.SetParent(FirstPersonCamera.transform);
+            pointMarker.transform.localPosition = Vector3.forward * .3f;
         }
 
-        /// <summary>
-        /// Returns true if the manipulation can be started for the given gesture.
-        /// </summary>
-        /// <param name="gesture">The current gesture.</param>
-        /// <returns>True if the manipulation can be started.</returns>
-        protected override bool CanStartManipulationForGesture(DragGesture gesture)
+        public void Update()
+        {
+            if (Input.touchCount > 0) {
+                Touch currentTouch = Input.GetTouch(0);
+                if (currentTouch.phase == TouchPhase.Began) {
+                        canStartTouchManipulation = CanStartTouchManipulation();
+                }
+
+                if (canStartTouchManipulation) {
+                    if (currentTouch.phase == TouchPhase.Began)
+                    {
+                       OnStartTouchManipulation();
+                    }
+                    else if (currentTouch.phase == TouchPhase.Stationary || currentTouch.phase == TouchPhase.Moved)
+                    {
+
+                        //Debug.Log("Continuing tap gesture");
+                        if (currentLineSketchObject)
+                        {
+                            //Debug.Log("Attempting to add control point.");
+                            currentLineSketchObject.addControlPointContinuous(FirstPersonCamera.transform.position + FirstPersonCamera.transform.forward * .3f);
+                        }
+                    }
+                    else if (currentTouch.phase == TouchPhase.Ended) {
+                            OnEndTouchManipulation();
+                        canStartTouchManipulation = false;
+                    }
+                }
+            }
+        }
+
+        private bool CanStartTouchManipulation()
         {
             // Should not handle input if the player is pointing on UI.
             if (Session.Status != SessionStatus.Tracking || EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
@@ -81,13 +76,11 @@ namespace Sketching
                 Debug.Log("Not starting tap gesture");
                 return false;
             }
-
             return true;
         }
 
-        protected override void OnStartManipulation(DragGesture gesture)
+        private void OnStartTouchManipulation()
         {
-            //base.OnStartManipulation(gesture);
             //see if an anchor exists
             if (!worldAnchor) {
                 Debug.Log("Create world anchor");
@@ -97,26 +90,10 @@ namespace Sketching
             // Instantiate game object at the hit pose.
             var gameObject = Instantiate(SketchObjectPrefab, worldAnchor.gameObject.transform);
             currentLineSketchObject = gameObject.GetComponent<LineSketchObject>();
-
-            addingControlPoints = true;
-
-            Select();
-            if (ManipulationSystem.Instance.SelectedObject != this.gameObject)
-            {
-                Debug.Log("Selecting manipulator failed. selected game object: " + ManipulationSystem.Instance.SelectedObject.name);
-            }
-            else {
-                Debug.Log("Sketch object manipulator selected.");
-            }
         }
 
-        /// <summary>
-        /// Function called when the manipulation is ended.
-        /// </summary>
-        /// <param name="gesture">The current gesture.</param>
-        protected override void OnEndManipulation(DragGesture gesture)
+        private void OnEndTouchManipulation()
         {
-            addingControlPoints = false;
             if (currentLineSketchObject) {
                 LineSketchObjects.Push(currentLineSketchObject);
             }
