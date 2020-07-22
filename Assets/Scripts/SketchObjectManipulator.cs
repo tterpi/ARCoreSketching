@@ -72,7 +72,7 @@ namespace Sketching
                         
                         OnEndTouchManipulation();
                         //if swipe left occured, delete the last sketch object
-                        if ((currentTouch.position.y - currentTouch.rawPosition.y) < 0 && Mathf.Abs(currentTouch.position.y - currentTouch.rawPosition.y) > Screen.width * 0.05)
+                        if ((currentTouch.position - currentTouch.rawPosition).magnitude > Screen.width * 0.05)
                         {
                             //Debug.Log("Deleting last object");
                             DeleteLastLineSketchObject();
