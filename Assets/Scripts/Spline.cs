@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Splines {
+    /// <summary>
+    /// Interface for a spline implementation
+    /// </summary>
     public abstract class Spline {
         public List<Vector3> InterpolatedPoints { get; protected set; }
 

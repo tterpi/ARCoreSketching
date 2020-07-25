@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Meshing {
+    /// <summary>
+    /// Generates a tube like mesh according to a set of points on a line
+    /// </summary>
     public class LineExtruder
     {
 

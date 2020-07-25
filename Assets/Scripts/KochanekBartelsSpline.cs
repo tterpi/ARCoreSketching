@@ -11,6 +11,9 @@ using UnityEngine;
 
 namespace Splines
 {
+    /// <summary>
+    /// Contains information about what parts of the spline were modified
+    /// </summary>
     public struct SplineModificationInfo{
         public int Index { get; private set; }
         public int RemoveCount { get; private set; }
@@ -27,6 +30,9 @@ namespace Splines
         }
     }
 
+    /// <summary>
+    /// Hermite interpolated spline with Kochanek-Bartels tangent calculation
+    /// </summary>
     public class KochanekBartelsSpline : Spline
     {
         private List<KochanekBartelsControlPoint> ControlPoints { get; set; }

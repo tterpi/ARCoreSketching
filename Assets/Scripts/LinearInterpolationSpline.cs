@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Splines {
+    /// <summary>
+    /// Spline that directly represents the provided control points, does not perform any interpolation
+    /// </summary>
     public class LinearInterpolationSpline: Spline
     {
         private List<Vector3> ControlPoints;

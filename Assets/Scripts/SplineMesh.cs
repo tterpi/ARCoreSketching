@@ -10,6 +10,10 @@ using UnityEngine;
 using Splines;
 using Meshing;
 
+/// <summary>
+/// Manages the communication between a spline object and the corresponding mesh.
+/// Provides methods to manipulate the spline and mesh simultaneously.
+/// </summary>
 public class SplineMesh
 {
     private Spline Spline;
