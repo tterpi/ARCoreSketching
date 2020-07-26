@@ -34,6 +34,9 @@ public class LineSketchObject : MonoBehaviour
     /// </summary>
     private SplineMesh LinearSplineMesh;
 
+    /// <summary>
+    /// Object to be displayed for a line of a single control point
+    /// </summary>
     [SerializeField]
     private GameObject sphereObject;
 
@@ -72,7 +75,6 @@ public class LineSketchObject : MonoBehaviour
             (transform.InverseTransformPoint(point) - SplineMesh.getControlPoints()[SplineMesh.getNumberOfControlPoints() - 1]).magnitude > 1f
            ) 
         {
-            //Debug.Log("Add control point to line sketch object");
             addControlPoint(point);
         }
     }
@@ -115,7 +117,8 @@ public class LineSketchObject : MonoBehaviour
             List<Vector3> controlPoints = SplineMesh.getControlPoints();
             //set the two control points, this will overwrite the mesh in mesh filter
             LinearSplineMesh.setControlPoints(controlPoints.ToArray());
-            meshCollider.sharedMesh = meshFilter.GetComponent<MeshFilter>().sharedMesh;
+            //update collider
+            meshCollider.sharedMesh = meshFilter.sharedMesh;
         }
         else
         {

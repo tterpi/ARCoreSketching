@@ -12,7 +12,7 @@ namespace Sketching
     using System.Collections.Generic;
 
     /// <summary>
-    /// Controls the creation and deletion of line sketch objects via a touch gestures.
+    /// Controls the creation and deletion of line sketch objects via touch gestures.
     /// </summary>
     public class SketchObjectManipulator : MonoBehaviour
     {
@@ -22,14 +22,38 @@ namespace Sketching
         /// </summary>
         public Camera FirstPersonCamera;
 
+        /// <summary>
+        /// Prefab that is instatiated to create a new line
+        /// </summary>
         public GameObject SketchObjectPrefab;
 
+        /// <summary>
+        /// The anchor that all sketch objects are attached to
+        /// </summary>
         private Anchor worldAnchor;
+
+        /// <summary>
+        /// The line sketch object that is currently being created.
+        /// </summary>
         private LineSketchObject currentLineSketchObject;
+        /// <summary>
+        /// The previously created lines
+        /// </summary>
         private Stack<LineSketchObject> LineSketchObjects = new Stack<LineSketchObject>();
+
+        /// <summary>
+        /// Used to check if the touch interaction should be performed
+        /// </summary>
         private bool canStartTouchManipulation = false;
 
+        /// <summary>
+        /// Shows were new control points are added
+        /// </summary>
         public GameObject pointMarker;
+
+        /// <summary>
+        /// True if a new touch was started, false if a new sketch object was created during this touch
+        /// </summary>
         private bool startNewSketchObject = false;
 
         public void Start()
@@ -91,6 +115,10 @@ namespace Sketching
             }
         }
 
+        /// <summary>
+        /// Checks if a touch interaction can be started
+        /// </summary>
+        /// <returns></returns>
         private bool CanStartTouchManipulation()
         {
             // Should not handle input if the player is pointing on UI or if the AR session is not tracking the environment.
@@ -102,6 +130,9 @@ namespace Sketching
             return true;
         }
 
+        /// <summary>
+        /// Instatiates a new LineSketchObject and parants it to the world anchor
+        /// </summary>
         private void CreateNewLineSketchObject()
         {
             //see if an anchor exists
@@ -113,6 +144,9 @@ namespace Sketching
             currentLineSketchObject = gameObject.GetComponent<LineSketchObject>();
         }
 
+        /// <summary>
+        /// Saves a LineSketchObject to the stack so it can be deleted later
+        /// </summary>
         private void AddCurrentLineSketchObjectToStack()
         {
             //add the current line sketch object to the stack
